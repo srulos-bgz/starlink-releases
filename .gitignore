@@ -1,0 +1,6 @@
+# This repository only contains binary releases
+# No source code or build artifacts
+
+.DS_Store
+*.swp
+*.tmp
