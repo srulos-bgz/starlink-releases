@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Starlink",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v13)
     ],
     products: [
         .library(
@@ -17,8 +17,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Starlink",
-            url: "https://github.com/srulos-bgz/starlink-releases/releases/download/1.1.0/Starlink.xcframework.zip",
-            checksum: "b6fca11a7954395051e15753937699e7ca21ea211d943c756b6590de9a39655c"
+            url: "https://github.com/srulos-bgz/starlink-releases/releases/download/1.2.0/Starlink.xcframework.zip",
+            checksum: "e19fba363c170347025132896f04e5ee81f73d0f505a1d8d0977d373e899801d"
         )
     ]
 )
