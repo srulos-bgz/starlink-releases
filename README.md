@@ -30,6 +30,19 @@ let rootViewController = StarlinkCore.shared.createWebViewRootViewController()
 window?.rootViewController = rootViewController
 ```
 
+## 示例项目
+
+本仓库包含 `StarlinkDemo` 示例项目，展示了如何正确集成和使用 Starlink 框架：
+
+- 完整的 iOS 应用示例
+- 正确的权限配置
+- WebView 控制器集成示例
+
+要运行示例项目：
+1. 克隆此仓库
+2. 打开 `StarlinkDemo/StarlinkDemo.xcodeproj`
+3. 运行项目
+
 ## 权限配置
 
 在项目的 `Info.plist` 中添加：
