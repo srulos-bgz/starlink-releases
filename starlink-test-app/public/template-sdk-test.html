@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SDK_NAME}} SDK Test - Starlink SDK</title>
+    <link rel="stylesheet" href="css/starlink-sdk-test.css">
+</head>
+<body data-theme="{{THEME_NAME}}">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SDK Test Suite</a>
+        
+        <div class="header">
+            <h1>{{SDK_ICON}} {{SDK_NAME}} SDK Test</h1>
+            <p>{{SDK_DESCRIPTION}}</p>
+        </div>
+        
+        <div class="test-panel">
+            <!-- SDK Status Section -->
+            <div class="status-section">
+                <h3>
+                    <span class="status-indicator status-warning" id="statusIndicator"></span>
+                    SDK Status
+                </h3>
+                <div class="status-details" id="statusDetails">
+                    Checking {{SDK_NAME}} SDK availability...
+                </div>
+            </div>
+
+            <!-- Available Methods Section -->
+            <div id="methods-container"></div>
+
+            <!-- Interactive Test Section (if needed) -->
+            {{INTERACTIVE_SECTION}}
+
+            <!-- Code Display Section -->
+            <div class="code-section">
+                <h3>💻 Native API Calls</h3>
+                <div class="code-display">
+                    <pre><code>{{API_EXAMPLES}}</code></pre>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            {{RESULTS_SECTION}}
+        </div>
+    </div>
+
+    <script src="js/starlink-sdk-test.js"></script>
+    <script>
+        // SDK-specific configuration
+        const SDK_CONFIG = {
+            moduleName: '{{MODULE_NAME}}',
+            methods: {{METHODS_CONFIG}},
+            autoRun: {{AUTO_RUN}},
+            interactive: {{INTERACTIVE}}
+        };
+
+        // Initialize SDK status checker
+        const sdkStatus = new StarlinkSDK.StarlinkSDKStatus(SDK_CONFIG.moduleName);
+        
+        // Initialize methods display
+        const methodsDisplay = new StarlinkSDK.MethodsDisplay();
+        
+        // Initialize result display (for interactive SDKs)
+        const resultDisplay = new StarlinkSDK.ResultDisplay();
+        
+        // Initialize info card display (for auto-run SDKs)
+        const infoDisplay = new StarlinkSDK.InfoCardDisplay();
+        
+        // Initialize code display
+        const codeDisplay = new StarlinkSDK.CodeDisplay();
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check SDK status
+            const isAvailable = sdkStatus.check();
+            
+            // Setup methods display
+            setupMethods();
+            
+            // Setup interactive elements or auto-run
+            if (SDK_CONFIG.interactive && isAvailable) {
+                setupInteractive();
+            } else if (SDK_CONFIG.autoRun && isAvailable) {
+                setTimeout(runAllTests, 500);
+            }
+        });
+
+        function setupMethods() {
+            SDK_CONFIG.methods.forEach(method => {
+                methodsDisplay.addMethod(
+                    method.signature,
+                    method.description,
+                    method.autoCall || false
+                );
+            });
+            methodsDisplay.render();
+        }
+
+        // SDK-specific implementations will be added here
+        {{SDK_SPECIFIC_FUNCTIONS}}
+    </script>
+</body>
+</html>

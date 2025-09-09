@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeviceInfo SDK Test - Starlink SDK</title>
+    <link rel="stylesheet" href="css/starlink-sdk-test.css">
+</head>
+<body data-theme="deviceinfo">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SDK Test Suite</a>
+        
+        <div class="header">
+            <h1>📱 DeviceInfo SDK Test</h1>
+            <p>Device and application information retrieval</p>
+        </div>
+        
+        <div class="test-panel">
+            <!-- SDK Status Section -->
+            <div class="status-section">
+                <h3>
+                    <span class="status-indicator status-warning" id="statusIndicator"></span>
+                    SDK Status
+                </h3>
+                <div class="status-details" id="statusDetails">
+                    Checking DeviceInfo SDK availability...
+                </div>
+            </div>
+
+            <!-- Available Methods Section -->
+            <div id="methods-container"></div>
+
+            <!-- Code Display Section -->
+            <div class="code-section">
+                <h3>💻 Native API Calls</h3>
+                <div class="code-display">
+                    <pre><code>// ===== NATIVE API CALLS =====
+// All methods are called automatically on page load
+
+// Get all information (device + app)
+const allInfo = await window.Starlink.DeviceInfo.getAllInfo();
+
+// Get device information only
+const deviceInfo = await window.Starlink.DeviceInfo.getAllDeviceInfo();
+
+// Get app information only  
+const appInfo = await window.Starlink.DeviceInfo.getAllAppInfo();
+
+// Individual device info methods
+const deviceModel = await window.Starlink.DeviceInfo.getDeviceModel();
+const systemVersion = await window.Starlink.DeviceInfo.getSystemVersion();
+const deviceName = await window.Starlink.DeviceInfo.getDeviceName();
+const systemName = await window.Starlink.DeviceInfo.getSystemName();
+const identifierForVendor = await window.Starlink.DeviceInfo.getIdentifierForVendor();
+const screenScale = await window.Starlink.DeviceInfo.getScreenScale();
+const screenSize = await window.Starlink.DeviceInfo.getScreenSize();
+const isJailbroken = await window.Starlink.DeviceInfo.isJailbroken();
+
+// Individual app info methods
+const bundleIdentifier = await window.Starlink.DeviceInfo.getBundleIdentifier();
+const appVersion = await window.Starlink.DeviceInfo.getAppVersion();
+const buildNumber = await window.Starlink.DeviceInfo.getBuildNumber();
+const appDisplayName = await window.Starlink.DeviceInfo.getAppDisplayName();
+const appExecutableName = await window.Starlink.DeviceInfo.getAppExecutableName();
+const firstInstallTime = await window.Starlink.DeviceInfo.getFirstInstallTime();
+const appInstallTime = await window.Starlink.DeviceInfo.getAppInstallTime();
+// ===========================</code></pre>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-grid">
+                <!-- All Info Card -->
+                <div class="info-card" id="allInfoCard">
+                    <h3>📊 Complete Information</h3>
+                    <div id="allInfoContent">
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value"><span class="loading"></span> Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device Info Card -->
+                <div class="info-card" id="deviceInfoCard">
+                    <h3>📱 Device Information</h3>
+                    <div id="deviceInfoContent">
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value"><span class="loading"></span> Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Info Card -->
+                <div class="info-card" id="appInfoCard">
+                    <h3>📦 Application Information</h3>
+                    <div id="appInfoContent">
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value"><span class="loading"></span> Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Individual Device Methods Card -->
+                <div class="info-card" id="individualDeviceCard">
+                    <h3>🔧 Individual Device Methods</h3>
+                    <div id="individualDeviceContent">
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value"><span class="loading"></span> Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Individual App Methods Card -->
+                <div class="info-card" id="individualAppCard">
+                    <h3>⚙️ Individual App Methods</h3>
+                    <div id="individualAppContent">
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value"><span class="loading"></span> Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/starlink-sdk-test.js"></script>
+    <script>
+        // SDK-specific configuration
+        const SDK_CONFIG = {
+            moduleName: 'DeviceInfo',
+            methods: [
+                {
+                    signature: 'getAllInfo()',
+                    description: 'Get all device and application information in one call',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAllDeviceInfo()',
+                    description: 'Get all device-related information',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAllAppInfo()',
+                    description: 'Get all application-related information',
+                    autoCall: true
+                },
+                {
+                    signature: 'getDeviceModel()',
+                    description: 'Get device model (e.g., iPhone14,2)',
+                    autoCall: true
+                },
+                {
+                    signature: 'getSystemVersion()',
+                    description: 'Get iOS system version',
+                    autoCall: true
+                },
+                {
+                    signature: 'getDeviceName()',
+                    description: 'Get user-defined device name',
+                    autoCall: true
+                },
+                {
+                    signature: 'getSystemName()',
+                    description: 'Get system name (iOS)',
+                    autoCall: true
+                },
+                {
+                    signature: 'getIdentifierForVendor()',
+                    description: 'Get unique vendor identifier',
+                    autoCall: true
+                },
+                {
+                    signature: 'getScreenScale()',
+                    description: 'Get screen scale factor',
+                    autoCall: true
+                },
+                {
+                    signature: 'getScreenSize()',
+                    description: 'Get screen size in points',
+                    autoCall: true
+                },
+                {
+                    signature: 'isJailbroken()',
+                    description: 'Check if device is jailbroken',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAppVersion()',
+                    description: 'Get app version string',
+                    autoCall: true
+                },
+                {
+                    signature: 'getBundleIdentifier()',
+                    description: 'Get app bundle identifier',
+                    autoCall: true
+                },
+                {
+                    signature: 'getBuildNumber()',
+                    description: 'Get app build number',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAppDisplayName()',
+                    description: 'Get app display name',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAppExecutableName()',
+                    description: 'Get app executable name',
+                    autoCall: true
+                },
+                {
+                    signature: 'getFirstInstallTime()',
+                    description: 'Get first app install timestamp',
+                    autoCall: true
+                },
+                {
+                    signature: 'getAppInstallTime()',
+                    description: 'Get current app install timestamp',
+                    autoCall: true
+                }
+            ],
+            autoRun: true,
+            interactive: false
+        };
+
+        // Initialize components
+        const sdkStatus = new StarlinkSDK.StarlinkSDKStatus(SDK_CONFIG.moduleName);
+        const methodsDisplay = new StarlinkSDK.MethodsDisplay();
+        const infoDisplay = new StarlinkSDK.InfoCardDisplay();
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check SDK status
+            const isAvailable = sdkStatus.check();
+            
+            // Setup methods display
+            setupMethods();
+            
+            // Setup info cards
+            setupInfoCards();
+            
+            // Auto-run tests if SDK is available
+            if (isAvailable) {
+                setTimeout(runAllTests, 500);
+            }
+        });
+
+        function setupMethods() {
+            SDK_CONFIG.methods.forEach(method => {
+                methodsDisplay.addMethod(
+                    method.signature,
+                    method.description,
+                    method.autoCall || false
+                );
+            });
+            methodsDisplay.render();
+        }
+
+        function setupInfoCards() {
+            infoDisplay.register('allInfoCard', 'allInfoContent');
+            infoDisplay.register('deviceInfoCard', 'deviceInfoContent');
+            infoDisplay.register('appInfoCard', 'appInfoContent');
+            infoDisplay.register('individualDeviceCard', 'individualDeviceContent');
+            infoDisplay.register('individualAppCard', 'individualAppContent');
+        }
+
+        async function runAllTests() {
+            if (!window.Starlink || !window.Starlink.DeviceInfo) {
+                const errorMsg = 'Starlink DeviceInfo bridge not available';
+                infoDisplay.showError('allInfoCard', errorMsg);
+                infoDisplay.showError('deviceInfoCard', errorMsg);
+                infoDisplay.showError('appInfoCard', errorMsg);
+                infoDisplay.showError('individualDeviceCard', errorMsg);
+                infoDisplay.showError('individualAppCard', errorMsg);
+                return;
+            }
+
+            // Test combined methods
+            await testGetAllInfo();
+            await testGetAllDeviceInfo();
+            await testGetAllAppInfo();
+            
+            // Test individual methods
+            await testIndividualDeviceMethods();
+            await testIndividualAppMethods();
+        }
+
+        async function testGetAllInfo() {
+            infoDisplay.showLoading('allInfoCard');
+            try {
+                const result = await window.Starlink.DeviceInfo.getAllInfo();
+                infoDisplay.showData('allInfoCard', result);
+            } catch (error) {
+                infoDisplay.showError('allInfoCard', error.message);
+            }
+        }
+
+        async function testGetAllDeviceInfo() {
+            infoDisplay.showLoading('deviceInfoCard');
+            try {
+                const result = await window.Starlink.DeviceInfo.getAllDeviceInfo();
+                infoDisplay.showData('deviceInfoCard', result);
+            } catch (error) {
+                infoDisplay.showError('deviceInfoCard', error.message);
+            }
+        }
+
+        async function testGetAllAppInfo() {
+            infoDisplay.showLoading('appInfoCard');
+            try {
+                const result = await window.Starlink.DeviceInfo.getAllAppInfo();
+                infoDisplay.showData('appInfoCard', result);
+            } catch (error) {
+                infoDisplay.showError('appInfoCard', error.message);
+            }
+        }
+
+        async function testIndividualDeviceMethods() {
+            infoDisplay.showLoading('individualDeviceCard');
+            try {
+                const deviceMethods = [
+                    'getDeviceModel',
+                    'getSystemVersion', 
+                    'getDeviceName',
+                    'getSystemName',
+                    'getIdentifierForVendor',
+                    'getScreenScale',
+                    'getScreenSize',
+                    'isJailbroken'
+                ];
+
+                const results = {};
+                for (const method of deviceMethods) {
+                    try {
+                        results[method] = await window.Starlink.DeviceInfo[method]();
+                    } catch (error) {
+                        results[method] = `Error: ${error.message}`;
+                    }
+                }
+                
+                infoDisplay.showData('individualDeviceCard', results);
+            } catch (error) {
+                infoDisplay.showError('individualDeviceCard', error.message);
+            }
+        }
+
+        async function testIndividualAppMethods() {
+            infoDisplay.showLoading('individualAppCard');
+            try {
+                const appMethods = [
+                    'getBundleIdentifier',
+                    'getAppVersion',
+                    'getBuildNumber',
+                    'getAppDisplayName',
+                    'getAppExecutableName',
+                    'getFirstInstallTime',
+                    'getAppInstallTime'
+                ];
+
+                const results = {};
+                for (const method of appMethods) {
+                    try {
+                        results[method] = await window.Starlink.DeviceInfo[method]();
+                    } catch (error) {
+                        results[method] = `Error: ${error.message}`;
+                    }
+                }
+                
+                infoDisplay.showData('individualAppCard', results);
+            } catch (error) {
+                infoDisplay.showError('individualAppCard', error.message);
+            }
+        }
+    </script>
+</body>
+</html>

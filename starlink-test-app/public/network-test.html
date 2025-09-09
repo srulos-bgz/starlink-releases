@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network SDK Test - Starlink SDK</title>
+    <link rel="stylesheet" href="css/starlink-sdk-test.css">
+</head>
+<body data-theme="network">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SDK Test Suite</a>
+        
+        <div class="header">
+            <h1>🌐 Network SDK Test</h1>
+            <p>HTTP requests with signature authentication and CORS support</p>
+        </div>
+        
+        <div class="test-panel">
+            <!-- SDK Status Section -->
+            <div class="status-section">
+                <h3>
+                    <span class="status-indicator status-warning" id="statusIndicator"></span>
+                    SDK Status
+                </h3>
+                <div class="status-details" id="statusDetails">
+                    Checking Network SDK availability...
+                </div>
+            </div>
+
+            <!-- Available Methods Section -->
+            <div id="methods-container"></div>
+
+            <!-- Interactive Test Section -->
+            <div class="test-section">
+                <h3>🚀 Test Network Methods</h3>
+                <!-- Quick API Test -->
+                <div class="form-group">
+                    <label>⚡ Quick API Test</label>
+                    <p>Test both signed and unsigned requests to a predefined API endpoint</p>
+                    <input type="text" id="quickTestUrl" value="https://cube.meituan.com/ipromotion/cube/toc/component/base/getServerCurrentTime">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testQuickUnsigned()">🚀 Test Unsigned Request</button>
+                        <button class="btn btn-secondary" onclick="testQuickSigned()">🔐 Test Signed Request</button>
+                        <button class="btn-code code-toggle" id="quickTestCodeBtn">Show Code</button>
+                    </div>
+                    <div id="quickTestCode" style="display: none;"></div>
+                </div>
+
+                <!-- Basic HTTP Requests -->
+                <div class="form-group">
+                    <label>🌐 Basic HTTP Requests</label>
+                    <input type="text" id="requestUrl" placeholder="Enter URL" value="https://httpbin.org/get">
+                    
+                    <select id="requestMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                    
+                    <textarea id="requestData" placeholder='{"key": "value"}' rows="3"></textarea>
+                    <textarea id="requestHeaders" placeholder='{"Authorization": "Bearer token"}' rows="2"></textarea>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testBasicRequest()">🚀 Send Request</button>
+                        <button class="btn btn-secondary" onclick="testSignedRequest()">🔐 Send Signed Request</button>
+                        <button class="btn-code code-toggle" id="requestCodeBtn">Show Code</button>
+                    </div>
+                    <div id="requestCode" style="display: none;"></div>
+                </div>
+
+            </div>
+            
+            <!-- Results Section -->
+            <div class="results-section">
+                <h3>📊 Test Results</h3>
+                <div id="results" class="results-container">
+                    <p>Test results will appear here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/starlink-sdk-test.js"></script>
+    <script>
+        // Initialize test page components
+        let sdkStatus;
+        let resultDisplay;
+        let codeDisplay;
+        let methodsDisplay;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize components
+            sdkStatus = new StarlinkSDK.StarlinkSDKStatus('Network', 'statusIndicator', 'statusDetails');
+            resultDisplay = new StarlinkSDK.ResultDisplay('results');
+            codeDisplay = new StarlinkSDK.CodeDisplay();
+            methodsDisplay = new StarlinkSDK.MethodsDisplay('methods-container');
+
+            // Check SDK status
+            sdkStatus.check();
+
+            // Setup methods documentation
+            methodsDisplay.addMethod('request(options)', 'Make an unsigned HTTP request');
+            methodsDisplay.addMethod('signedRequest(options)', 'Make a signed HTTP request with anti-replay protection');
+            methodsDisplay.render();
+
+            // Setup code examples
+            codeDisplay.register('quickTestCodeBtn', 'quickTestCode', `// Quick API Test - Unsigned Request
+const unsignedResponse = await window.Starlink.Network.request({
+    url: 'https://cube.meituan.com/ipromotion/cube/toc/component/base/getServerCurrentTime',
+    method: 'GET'
+});
+
+// Quick API Test - Signed Request (with anti-replay protection)
+const signedResponse = await window.Starlink.Network.signedRequest({
+    url: 'https://cube.meituan.com/ipromotion/cube/toc/component/base/getServerCurrentTime',
+    method: 'GET'
+});
+
+// Compare results
+console.log('Unsigned:', unsignedResponse);
+console.log('Signed:', signedResponse);`);
+            
+            codeDisplay.register('requestCodeBtn', 'requestCode', `// Basic HTTP Request
+const response = await window.Starlink.Network.request({
+    url: 'https://httpbin.org/get',
+    method: 'GET',
+    parameters: { key: 'value' },
+    headers: { 'Authorization': 'Bearer token' }
+});
+
+// Signed Request (with anti-replay signature)
+const signedResponse = await window.Starlink.Network.signedRequest({
+    url: 'https://api.example.com/secure',
+    method: 'POST',
+    parameters: { data: 'sensitive' }
+});`);
+        });
+
+        // Quick API Test Functions
+        async function testQuickUnsigned() {
+            const url = document.getElementById('quickTestUrl').value.trim();
+            
+            if (!url) {
+                resultDisplay.showError('URL is required');
+                return;
+            }
+            
+            try {
+                codeDisplay.show('quickTestCodeBtn');
+                const startTime = Date.now();
+                const result = await window.Starlink.Network.request({
+                    url: url,
+                    method: 'GET'
+                });
+                const endTime = Date.now();
+                
+                console.log('Quick Test Unsigned Request result:', result);
+                const message = resultDisplay.formatApiResult('Network.request (Unsigned)', 
+                    {url, method: 'GET', requestTime: `${endTime - startTime}ms`}, 
+                    result, true
+                );
+                resultDisplay.showSuccess(message);
+            } catch (error) {
+                console.error('Quick Test Unsigned Request failed:', error);
+                const message = resultDisplay.formatApiResult('Network.request (Unsigned)', 
+                    {url, method: 'GET'}, 
+                    error.message, false
+                );
+                resultDisplay.showError(message);
+            }
+        }
+
+        async function testQuickSigned() {
+            const url = document.getElementById('quickTestUrl').value.trim();
+            
+            if (!url) {
+                resultDisplay.showError('URL is required');
+                return;
+            }
+            
+            try {
+                const startTime = Date.now();
+                const result = await window.Starlink.Network.signedRequest({
+                    url: url,
+                    method: 'GET'
+                });
+                const endTime = Date.now();
+                
+                console.log('Quick Test Signed Request result:', result);
+                const message = resultDisplay.formatApiResult('Network.signedRequest (Signed)', 
+                    {url, method: 'GET', requestTime: `${endTime - startTime}ms`}, 
+                    result, true
+                );
+                resultDisplay.showSuccess(message);
+            } catch (error) {
+                console.error('Quick Test Signed Request failed:', error);
+                const message = resultDisplay.formatApiResult('Network.signedRequest (Signed)', 
+                    {url, method: 'GET'}, 
+                    error.message, false
+                );
+                resultDisplay.showError(message);
+            }
+        }
+
+
+        // Test Functions
+        async function testBasicRequest() {
+            const url = document.getElementById('requestUrl').value.trim();
+            const method = document.getElementById('requestMethod').value;
+            const dataText = document.getElementById('requestData').value.trim();
+            const headersText = document.getElementById('requestHeaders').value.trim();
+
+            if (!url) {
+                resultDisplay.showError('URL is required');
+                return;
+            }
+
+            let parameters = null;
+            let headers = null;
+
+            try {
+                if (dataText) {
+                    parameters = JSON.parse(dataText);
+                }
+                if (headersText) {
+                    headers = JSON.parse(headersText);
+                }
+            } catch (error) {
+                resultDisplay.showError('Invalid JSON format');
+                return;
+            }
+
+            try {
+                codeDisplay.show('requestCodeBtn');
+                const result = await window.Starlink.Network.request({
+                    url: url,
+                    method: method,
+                    parameters: parameters,
+                    headers: headers
+                });
+                console.log('Network.request result:', result);
+                const message = resultDisplay.formatApiResult('Network.request', 
+                    {url, method, parameters, headers}, result, true
+                );
+                resultDisplay.showSuccess(message);
+            } catch (error) {
+                const message = resultDisplay.formatApiResult('Network.request', 
+                    {url, method, parameters, headers}, error.message, false
+                );
+                resultDisplay.showError(message);
+            }
+        }
+
+        async function testSignedRequest() {
+            const url = document.getElementById('requestUrl').value.trim();
+            const method = document.getElementById('requestMethod').value;
+            const dataText = document.getElementById('requestData').value.trim();
+            const headersText = document.getElementById('requestHeaders').value.trim();
+
+            if (!url) {
+                resultDisplay.showError('URL is required');
+                return;
+            }
+
+            let parameters = null;
+            let headers = null;
+
+            try {
+                if (dataText) {
+                    parameters = JSON.parse(dataText);
+                }
+                if (headersText) {
+                    headers = JSON.parse(headersText);
+                }
+            } catch (error) {
+                resultDisplay.showError('Invalid JSON format');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.Network.signedRequest({
+                    url: url,
+                    method: method,
+                    parameters: parameters,
+                    headers: headers
+                });
+                console.log('Network.signedRequest result:', result);
+                const message = resultDisplay.formatApiResult('Network.signedRequest', 
+                    {url, method, parameters, headers}, result, true
+                );
+                resultDisplay.showSuccess(message);
+            } catch (error) {
+                const message = resultDisplay.formatApiResult('Network.signedRequest', 
+                    {url, method, parameters, headers}, error.message, false
+                );
+                resultDisplay.showError(message);
+            }
+        }
+
+    </script>
+</body>
+</html>

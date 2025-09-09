@@ -43,6 +43,20 @@ window?.rootViewController = rootViewController
 2. 打开 `StarlinkDemo/StarlinkDemo.xcodeproj`
 3. 运行项目
 
+## JavaScript SDK 测试应用
+
+本仓库还包含 `starlink-test-app` JavaScript SDK 测试应用，用于测试各种桥接功能：
+
+- 完整的 JavaScript SDK 文档
+- Express 测试服务器
+- 各种桥接功能的测试页面
+
+要运行测试应用：
+1. 进入 `starlink-test-app` 目录
+2. 运行 `npm install` 安装依赖
+3. 运行 `npm start` 启动测试服务器
+4. 在浏览器中访问 `http://localhost:3000`
+
 ## 权限配置
 
 在项目的 `Info.plist` 中添加：

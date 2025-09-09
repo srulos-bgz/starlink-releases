@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umeng SDK Test - Starlink SDK</title>
+    <link rel="stylesheet" href="css/starlink-sdk-test.css">
+</head>
+<body data-theme="umeng">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SDK Test Suite</a>
+        
+        <div class="header">
+            <h1>📊 Umeng SDK Test</h1>
+            <p>Analytics and statistics integration with Umeng platform</p>
+        </div>
+        
+        <div class="test-panel">
+            <!-- SDK Status Section -->
+            <div class="status-section">
+                <h3>
+                    <span class="status-indicator status-warning" id="statusIndicator"></span>
+                    SDK Status
+                </h3>
+                <div class="status-details" id="statusDetails">
+                    Checking Umeng SDK availability...
+                </div>
+            </div>
+
+            <!-- Available Methods Section -->
+            <div id="methods-container"></div>
+
+            <!-- Interactive Test Section -->
+            <div class="test-section">
+                <h3>🚀 Initialize Umeng SDK</h3>
+                
+                <div class="form-group">
+                    <label for="appKey">App Key *</label>
+                    <input type="text" id="appKey" placeholder="Enter your Umeng App Key" required>
+                    <small>Get your App Key from Umeng Console</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="channel">Distribution Channel</label>
+                    <select id="channel">
+                        <option value="App Store">App Store</option>
+                        <option value="TestFlight">TestFlight</option>
+                        <option value="Enterprise">Enterprise</option>
+                        <option value="Debug">Debug</option>
+                        <option value="Custom">Custom...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customChannelGroup" style="display: none;">
+                    <label for="customChannel">Custom Channel Name</label>
+                    <input type="text" id="customChannel" placeholder="Enter custom channel name">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="testUmengInit()">
+                        🚀 Initialize SDK
+                    </button>
+                    <button class="btn-code code-toggle" id="initCodeBtn">
+                        Show Code
+                    </button>
+                </div>
+
+                <div id="initCode" style="display: none;"></div>
+
+                <div id="result-area" class="result-area">
+                    Results will appear here...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/starlink-sdk-test.js"></script>
+    <script>
+        // SDK-specific configuration
+        const SDK_CONFIG = {
+            moduleName: 'Umeng',
+            methods: [
+                {
+                    signature: 'init(appKey, channel)',
+                    description: 'Initialize Umeng SDK with app key and distribution channel',
+                    autoCall: false
+                }
+            ],
+            autoRun: false,
+            interactive: true
+        };
+
+        // Initialize components
+        const sdkStatus = new StarlinkSDK.StarlinkSDKStatus(SDK_CONFIG.moduleName);
+        const methodsDisplay = new StarlinkSDK.MethodsDisplay();
+        const resultDisplay = new StarlinkSDK.ResultDisplay();
+        const codeDisplay = new StarlinkSDK.CodeDisplay();
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check SDK status
+            const isAvailable = sdkStatus.check();
+            
+            // Setup methods display
+            setupMethods();
+            
+            // Setup interactive elements
+            if (isAvailable) {
+                setupInteractive();
+            }
+        });
+
+        function setupMethods() {
+            SDK_CONFIG.methods.forEach(method => {
+                methodsDisplay.addMethod(
+                    method.signature,
+                    method.description,
+                    method.autoCall || false
+                );
+            });
+            methodsDisplay.render();
+        }
+
+        function setupInteractive() {
+            // Setup custom channel toggle
+            document.getElementById('channel').addEventListener('change', function() {
+                const customGroup = document.getElementById('customChannelGroup');
+                if (this.value === 'Custom') {
+                    customGroup.style.display = 'block';
+                } else {
+                    customGroup.style.display = 'none';
+                }
+            });
+
+            // Setup code display
+            codeDisplay.register('initCodeBtn', 'initCode', 
+                StarlinkSDK.StarlinkUtils.createCodeBlock(
+                    'const result = await window.Starlink.Umeng.init(appKey, channel);'
+                )
+            );
+        }
+
+        async function testUmengInit() {
+            const appKey = document.getElementById('appKey').value.trim();
+            const channelSelect = document.getElementById('channel').value;
+            const customChannel = document.getElementById('customChannel').value.trim();
+            
+            // Validation
+            if (!appKey) {
+                resultDisplay.showError('❌ Error: App Key is required');
+                return;
+            }
+            
+            const channel = channelSelect === 'Custom' ? customChannel : channelSelect;
+            
+            if (channelSelect === 'Custom' && !customChannel) {
+                resultDisplay.showError('❌ Error: Custom channel name is required');
+                return;
+            }
+
+            // Check if native bridge is available
+            if (!window.Starlink || !window.Starlink.Umeng) {
+                resultDisplay.showError('❌ Error: Starlink native bridge not available. This test requires Starlink WebView environment.');
+                return;
+            }
+
+            try {
+                resultDisplay.showInfo('🔄 Initializing Umeng SDK...');
+                
+                // Show code automatically when test runs
+                codeDisplay.show('initCodeBtn');
+                
+                // ===== NATIVE API CALL =====
+                const result = await window.Starlink.Umeng.init(appKey, channel);
+                // ===========================
+                
+                const successMessage = resultDisplay.formatApiResult(
+                    'Umeng.init',
+                    { appKey, channel },
+                    result,
+                    true
+                );
+                
+                resultDisplay.showSuccess(successMessage);
+                
+            } catch (error) {
+                const errorMessage = resultDisplay.formatApiResult(
+                    'Umeng.init',
+                    { appKey, channel },
+                    error.message,
+                    false
+                );
+                
+                resultDisplay.showError(errorMessage);
+            }
+        }
+    </script>
+</body>
+</html>

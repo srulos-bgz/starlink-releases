@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAP SDK Test - Starlink SDK</title>
+    <link rel="stylesheet" href="css/starlink-sdk-test.css">
+</head>
+<body data-theme="iap">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SDK Test Suite</a>
+        
+        <div class="header">
+            <h1>💰 IAP SDK Test</h1>
+            <p>In-App Purchase functionality with subscription management</p>
+        </div>
+        
+        <div class="test-panel">
+            <!-- SDK Status Section -->
+            <div class="status-section">
+                <h3>
+                    <span class="status-indicator status-warning" id="statusIndicator"></span>
+                    SDK Status
+                </h3>
+                <div class="status-details" id="statusDetails">
+                    Checking IAP SDK availability...
+                </div>
+            </div>
+
+            <!-- Available Methods Section -->
+            <div id="methods-container"></div>
+
+            <!-- Interactive Test Section -->
+            <div class="test-section">
+                <h3>🚀 Test IAP Methods</h3>
+                
+                <!-- Configuration Section -->
+                <div class="form-group">
+                    <h4>⚙️ Configuration</h4>
+                    <label for="productIDs">Product IDs (comma separated)</label>
+                    <input type="text" id="productIDs" placeholder="com.aircon.remote.weekly,com.aircon.remote.yearly" value="com.aircon.remote.weekly,com.aircon.remote.yearly">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testConfigure()">⚙️ Configure IAP</button>
+                        <button class="btn btn-secondary" onclick="testCanMakePayments()">❓ Can Make Payments</button>
+                        <button class="btn-code code-toggle" id="configCodeBtn">Show Code</button>
+                    </div>
+                    <div id="configCode" style="display: none;"></div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="form-group">
+                    <h4>🛍️ Products Management</h4>
+                    <label for="singleProductID">Single Product ID</label>
+                    <input type="text" id="singleProductID" placeholder="Enter product ID" value="com.aircon.remote.weekly">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testLoadProducts()">📥 Load Products</button>
+                        <button class="btn btn-primary" onclick="testGetProducts()">📋 Get Products</button>
+                        <button class="btn btn-secondary" onclick="testGetProduct()">🔍 Get Single Product</button>
+                        <button class="btn-code code-toggle" id="productsCodeBtn">Show Code</button>
+                    </div>
+                    <div id="productsCode" style="display: none;"></div>
+                </div>
+
+                <!-- Purchase Section -->
+                <div class="form-group">
+                    <h4>💳 Purchase Operations</h4>
+                    <label for="purchaseProductID">Product ID</label>
+                    <input type="text" id="purchaseProductID" placeholder="Enter product ID" value="com.aircon.remote.weekly">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testPurchase()">💰 Purchase Product</button>
+                        <button class="btn btn-secondary" onclick="testIsPurchased()">✅ Check Purchased</button>
+                        <button class="btn btn-secondary" onclick="testGetPurchasedProducts()">📋 Get All Purchased</button>
+                        <button class="btn btn-secondary" onclick="testRestorePurchases()">🔄 Restore Purchases</button>
+                        <button class="btn-code code-toggle" id="purchaseCodeBtn">Show Code</button>
+                    </div>
+                    <div id="purchaseCode" style="display: none;"></div>
+                </div>
+
+                <!-- Subscription Section -->
+                <div class="form-group">
+                    <h4>📅 Subscription Management</h4>
+                    <label for="subscriptionProductID">Subscription Product ID</label>
+                    <input type="text" id="subscriptionProductID" placeholder="Enter subscription product ID" value="com.aircon.remote.weekly">
+                    
+                    <label for="subscriptionGroupID">Subscription Group ID</label>
+                    <input type="text" id="subscriptionGroupID" placeholder="Enter subscription group ID" value="premium_group">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="testUpdateSubscriptionStatuses()">🔄 Update Statuses</button>
+                        <button class="btn btn-secondary" onclick="testGetSubscriptionInfo()">ℹ️ Get Info</button>
+                        <button class="btn btn-secondary" onclick="testHasActiveSubscription()">✅ Has Active</button>
+                        <button class="btn btn-secondary" onclick="testGetSubscriptionGroup()">👥 Get Group</button>
+                        <button class="btn btn-secondary" onclick="testGetRenewalDate()">📅 Renewal Date</button>
+                        <button class="btn btn-secondary" onclick="testCancelSubscription()">❌ Cancel</button>
+                        <button class="btn-code code-toggle" id="subscriptionCodeBtn">Show Code</button>
+                    </div>
+                    <div id="subscriptionCode" style="display: none;"></div>
+                </div>
+
+                <div id="result-area" class="result-area">
+                    Results will appear here...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/starlink-sdk-test.js"></script>
+    <script>
+        // SDK-specific configuration
+        const SDK_CONFIG = {
+            moduleName: 'IAP',
+            methods: [
+                // Basic IAP Operations
+                { signature: 'configure(productIDs)', description: 'Configure IAP with product identifiers', autoCall: false },
+                { signature: 'loadProducts(forceRefresh)', description: 'Load products from App Store', autoCall: false },
+                { signature: 'getProducts()', description: 'Get all loaded products', autoCall: false },
+                { signature: 'getProduct(productID)', description: 'Get specific product by ID', autoCall: false },
+                { signature: 'purchase(productID)', description: 'Purchase a product', autoCall: false },
+                { signature: 'isPurchased(productID)', description: 'Check if product is purchased', autoCall: false },
+                { signature: 'getPurchasedProducts()', description: 'Get all purchased product IDs', autoCall: false },
+                { signature: 'restorePurchases()', description: 'Restore previous purchases', autoCall: false },
+                { signature: 'canMakePayments()', description: 'Check if payments are allowed on this device', autoCall: false },
+                // Subscription Management
+                { signature: 'subscription.updateStatuses(forceRefresh)', description: 'Update subscription statuses', autoCall: false },
+                { signature: 'subscription.getInfo(productID)', description: 'Get subscription information for a product', autoCall: false },
+                { signature: 'subscription.hasActive(productID)', description: 'Check if user has active subscription', autoCall: false },
+                { signature: 'subscription.getGroup(groupID)', description: 'Get subscriptions in a group', autoCall: false },
+                { signature: 'subscription.cancel(productID)', description: 'Cancel subscription (opens App Store management)', autoCall: false },
+                { signature: 'subscription.getRenewalDate(productID)', description: 'Get subscription renewal date', autoCall: false }
+            ],
+            autoRun: false,
+            interactive: true
+        };
+
+        // Initialize components
+        const sdkStatus = new StarlinkSDK.StarlinkSDKStatus(SDK_CONFIG.moduleName);
+        const methodsDisplay = new StarlinkSDK.MethodsDisplay();
+        const resultDisplay = new StarlinkSDK.ResultDisplay();
+        const codeDisplay = new StarlinkSDK.CodeDisplay();
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAvailable = sdkStatus.check();
+            setupMethods();
+            if (isAvailable) {
+                setupInteractive();
+            }
+        });
+
+        function setupMethods() {
+            SDK_CONFIG.methods.forEach(method => {
+                methodsDisplay.addMethod(method.signature, method.description, method.autoCall || false);
+            });
+            methodsDisplay.render();
+        }
+
+        function setupInteractive() {
+            // Setup code displays
+            codeDisplay.register('configCodeBtn', 'configCode', 
+                StarlinkSDK.StarlinkUtils.createCodeBlock(`// Configuration
+const productIDs = ['com.myapp.premium', 'com.myapp.coins_100'];
+await window.Starlink.IAP.configure(productIDs);
+const canPay = await window.Starlink.IAP.canMakePayments();`)
+            );
+            
+            codeDisplay.register('productsCodeBtn', 'productsCode', 
+                StarlinkSDK.StarlinkUtils.createCodeBlock(`// Products Management
+const products = await window.Starlink.IAP.loadProducts();
+const allProducts = await window.Starlink.IAP.getProducts();
+const product = await window.Starlink.IAP.getProduct('com.aircon.remote.weekly');`)
+            );
+            
+            codeDisplay.register('purchaseCodeBtn', 'purchaseCode', 
+                StarlinkSDK.StarlinkUtils.createCodeBlock(`// Purchase Operations
+const result = await window.Starlink.IAP.purchase('com.myapp.premium');
+const isPurchased = await window.Starlink.IAP.isPurchased('com.myapp.premium');
+const purchased = await window.Starlink.IAP.getPurchasedProducts();
+await window.Starlink.IAP.restorePurchases();`)
+            );
+            
+            codeDisplay.register('subscriptionCodeBtn', 'subscriptionCode', 
+                StarlinkSDK.StarlinkUtils.createCodeBlock(`// Subscription Management
+await window.Starlink.IAP.subscription.updateStatuses();
+const info = await window.Starlink.IAP.subscription.getInfo('com.myapp.monthly_sub');
+const hasActive = await window.Starlink.IAP.subscription.hasActive('com.myapp.monthly_sub');
+const group = await window.Starlink.IAP.subscription.getGroup('premium_group');
+const renewalDate = await window.Starlink.IAP.subscription.getRenewalDate('com.myapp.monthly_sub');`)
+            );
+        }
+
+        async function testConfigure() {
+            const productIDsText = document.getElementById('productIDs').value.trim();
+            if (!productIDsText) {
+                resultDisplay.showError('❌ Error: Product IDs are required');
+                return;
+            }
+
+            const productIDs = productIDsText.split(',').map(id => id.trim()).filter(id => id);
+            if (productIDs.length === 0) {
+                resultDisplay.showError('❌ Error: At least one product ID is required');
+                return;
+            }
+
+            if (!window.Starlink?.IAP) {
+                resultDisplay.showError('❌ Error: Starlink IAP bridge not available');
+                return;
+            }
+
+            try {
+                codeDisplay.show('configCodeBtn');
+                const result = await window.Starlink.IAP.configure(productIDs);
+                console.log('IAP.configure result:', result);
+                
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.configure', {productIDs}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.configure', {productIDs}, error.message, false
+                ));
+            }
+        }
+
+        async function testCanMakePayments() {
+            if (!window.Starlink?.IAP) {
+                resultDisplay.showError('❌ Error: Starlink IAP bridge not available');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.canMakePayments();
+                console.log('IAP.canMakePayments result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.canMakePayments', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.canMakePayments', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testLoadProducts() {
+            try {
+                codeDisplay.show('productsCodeBtn');
+                const result = await window.Starlink.IAP.loadProducts();
+                console.log('IAP.loadProducts result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.loadProducts', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.loadProducts', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetProducts() {
+            try {
+                const result = await window.Starlink.IAP.getProducts();
+                console.log('IAP.getProducts result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.getProducts', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.getProducts', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetProduct() {
+            const productID = document.getElementById('singleProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.getProduct(productID);
+                console.log('IAP.getProduct result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.getProduct', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.getProduct', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testPurchase() {
+            const productID = document.getElementById('purchaseProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Product ID is required');
+                return;
+            }
+
+            try {
+                codeDisplay.show('purchaseCodeBtn');
+                const result = await window.Starlink.IAP.purchase(productID);
+                console.log('IAP.purchase result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.purchase', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.purchase', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testIsPurchased() {
+            const productID = document.getElementById('purchaseProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.isPurchased(productID);
+                console.log('IAP.isPurchased result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.isPurchased', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.isPurchased', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetPurchasedProducts() {
+            try {
+                const result = await window.Starlink.IAP.getPurchasedProducts();
+                console.log('IAP.getPurchasedProducts result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.getPurchasedProducts', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.getPurchasedProducts', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testRestorePurchases() {
+            try {
+                const result = await window.Starlink.IAP.restorePurchases();
+                console.log('IAP.restorePurchases result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.restorePurchases', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.restorePurchases', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testUpdateSubscriptionStatuses() {
+            try {
+                codeDisplay.show('subscriptionCodeBtn');
+                const result = await window.Starlink.IAP.subscription.updateStatuses();
+                console.log('IAP.subscription.updateStatuses result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.updateStatuses', {}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.updateStatuses', {}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetSubscriptionInfo() {
+            const productID = document.getElementById('subscriptionProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Subscription Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.subscription.getInfo(productID);
+                console.log('IAP.subscription.getInfo result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.getInfo', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.getInfo', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testHasActiveSubscription() {
+            const productID = document.getElementById('subscriptionProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Subscription Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.subscription.hasActive(productID);
+                console.log('IAP.subscription.hasActive result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.hasActive', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.hasActive', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetSubscriptionGroup() {
+            const groupID = document.getElementById('subscriptionGroupID').value.trim();
+            if (!groupID) {
+                resultDisplay.showError('❌ Error: Subscription Group ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.subscription.getGroup(groupID);
+                console.log('IAP.subscription.getGroup result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.getGroup', {groupID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.getGroup', {groupID}, error.message, false
+                ));
+            }
+        }
+
+        async function testGetRenewalDate() {
+            const productID = document.getElementById('subscriptionProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Subscription Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.subscription.getRenewalDate(productID);
+                console.log('IAP.subscription.getRenewalDate result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.getRenewalDate', {productID}, result, true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.getRenewalDate', {productID}, error.message, false
+                ));
+            }
+        }
+
+        async function testCancelSubscription() {
+            const productID = document.getElementById('subscriptionProductID').value.trim();
+            if (!productID) {
+                resultDisplay.showError('❌ Error: Subscription Product ID is required');
+                return;
+            }
+
+            try {
+                const result = await window.Starlink.IAP.subscription.cancel(productID);
+                console.log('IAP.subscription.cancel result:', result);
+                resultDisplay.showSuccess(resultDisplay.formatApiResult(
+                    'IAP.subscription.cancel', {productID}, 'App Store opened for subscription management', true
+                ));
+            } catch (error) {
+                resultDisplay.showError(resultDisplay.formatApiResult(
+                    'IAP.subscription.cancel', {productID}, error.message, false
+                ));
+            }
+        }
+    </script>
+</body>
+</html>
