@@ -25,12 +25,9 @@ dependencies: [
 ```swift
 import Starlink
 
-// 初始化框架
-StarlinkCore.shared.initialize()
-
-// 创建 WebView 控制器
-let webViewController = StarlinkCore.shared.createWebViewRootViewController()
-present(webViewController, animated: true)
+// Set StarlinkWebViewController as root view controller
+let rootViewController = StarlinkCore.shared.createWebViewRootViewController()
+window?.rootViewController = rootViewController
 ```
 
 ## 权限配置
@@ -55,7 +52,7 @@ present(webViewController, animated: true)
 
 ## 系统要求
 
-- iOS 13.0+
+- iOS 16.0+
 - Xcode 14.0+
 - Swift 5.7+
 
