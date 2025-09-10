@@ -10,14 +10,14 @@
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.3")
+    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.4")
 ]
 ```
 
 或在 Xcode 中：
 1. File → Add Package Dependencies
 2. 输入仓库 URL: `https://github.com/srulos-bgz/starlink-releases`
-3. 选择版本 `1.7.3` 或更高版本
+3. 选择版本 `1.7.4` 或更高版本
 
 ## 📋 使用示例
 
@@ -191,7 +191,7 @@ window.Starlink.DemoAPI.function2((result) => {
 - [完整示例项目](https://github.com/srulos-bgz/starlink-test-app) - Native API 在 Web 项目中的完整使用示例
 - [更新日志](https://github.com/srulos-bgz/starlink-releases/releases)
 
-## 🆕 最新更新 (v1.7.3)
+## 🆕 最新更新 (v1.7.4)
 
 ### 🔧 运行时调试模式支持 (v1.7.0)
 - **重要更新**: 解决了 framework 打包后无法进入调试模式的问题
@@ -203,9 +203,9 @@ window.Starlink.DemoAPI.function2((result) => {
 - **重要更新**: 修复了 "No such module 'UMCommon'" 错误
 - 所有友盟SDK依赖现已自动包含在framework中：
 
-查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.3)
+查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.4)
 
 ---
 
-**当前版本**: 1.7.3  
-**Checksum**: a2d72e140d7feba9f2ef1ba47a7c62d61fa3ac39e57c8ab8b31f3d66bd89fa8e
+**当前版本**: 1.7.4  
+**Checksum**: b005e116826271280351519c0ef397324145c0ec2044d04424e042a8fa8c5f38
