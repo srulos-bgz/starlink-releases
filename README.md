@@ -1,73 +1,371 @@
-# Starlink iOS Framework
+# Starlink iOS SDK
 
-Starlink 是一个功能强大的 iOS 框架，提供 WebView 集成、网络管理、本地服务器等功能。
+A comprehensive iOS framework providing In-App Purchase management, JavaScript bridge functionality, WebView integration, network monitoring, and local HTTP server capabilities for hybrid iOS applications.
 
-## 📦 安装
+## Project Structure
 
-### Swift Package Manager
-
-在 Xcode 中添加包依赖：
-
-1. File → Add Package Dependencies
-2. 输入仓库 URL: `https://github.com/srulos-bgz/starlink-releases`
-3. 选择版本
-
-或在 `Package.swift` 中添加：
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/srulos-bgz/starlink-releases.git", from: "1.3.0")
-]
+```
+SLSDK/
+├── Starlink.xcworkspace/          # Main workspace
+├── Starlink/                      # Framework project
+│   ├── Starlink/
+│   │   ├── Core/                 # Core framework components
+│   │   │   ├── Bridge/           # JavaScript bridge modules
+│   │   │   ├── IAP/              # In-App Purchase management
+│   │   │   ├── WebView/          # WebView controllers
+│   │   │   ├── Update/           # App update checking
+│   │   │   └── Data/             # Data management
+│   │   ├── Networking/           # Network utilities and monitoring
+│   │   ├── Utilities/            # Helper utilities
+│   │   ├── Logging/              # Logging system
+│   │   ├── Frameworks/           # Third-party frameworks
+│   │   ├── Starlink.h            # Public header
+│   │   └── Info.plist            # Framework info
+│   └── Starlink.xcodeproj/       # Framework Xcode project
+└── StarlinkDemo/                  # Demo application
+    ├── StarlinkDemo/
+    │   ├── AppDelegate.swift
+    │   ├── SceneDelegate.swift
+    │   ├── ViewController.swift   # Demo UI implementation
+    │   ├── Main.storyboard        # UI layout
+    │   ├── LaunchScreen.storyboard
+    │   ├── Assets.xcassets
+    │   └── Info.plist
+    └── StarlinkDemo.xcodeproj/    # Demo app Xcode project
 ```
 
-## 🚀 快速开始
+## Features
 
+### Core Framework
+- **StarlinkCore**: Main framework class with singleton pattern
+- **JavaScript Bridge System**: Complete JS bridge for native iOS API access
+- **WebView Integration**: Full-featured WebView controllers for hybrid apps
+- **Local HTTP Server**: Built-in web server for serving Vue.js projects and static files
+- **Logging System**: Comprehensive logging with multiple levels
+
+### In-App Purchase & Subscriptions
+- **StarlinkIAPManager**: Complete IAP management with StoreKit 2
+- **StarlinkSubscriptionManager**: Advanced subscription handling and status tracking
+- **StarlinkIAPBridge**: JavaScript bridge for IAP functionality
+- **Product Management**: Load, purchase, restore, and query products
+- **Subscription Status**: Real-time subscription state monitoring
+- **Transaction Handling**: Automatic transaction processing and validation
+
+### JavaScript Bridge Modules
+- **StarlinkIAPBridge**: In-App Purchase and subscription management
+- **StarlinkAlertBridge**: Native alert and action sheet display
+- **StarlinkDataBridge**: Data storage and retrieval
+- **StarlinkDeviceInfoBridge**: Device information and capabilities
+- **StarlinkUmengBridge**: Analytics integration
+- **StarlinkNetworkBridge**: Network request handling
+- **Custom Extension Support**: Extensible bridge system for business-specific APIs
+
+### Network & Connectivity
+- **StarlinkNetworkManager**: HTTP request handling and management
+- **StarlinkNetworkPermissionMonitor**: Automatic network permission monitoring
+- **Auto Permission Requests**: Proactive network access permission handling
+
+### WebView & Hybrid App Support
+- **StarlinkWebViewController**: Full-featured WebView controller
+- **Debug/Release Modes**: Different behavior for development and production
+- **Runtime Debug Mode**: Enable debug mode even when framework is built in Release mode
+- **Update Checking**: Automatic app update verification
+- **Local Server Integration**: Seamless local content serving
+
+### Demo Application
+- Interactive UI demonstrating all framework capabilities
+- IAP and subscription testing interface
+- WebView integration examples
+- Network monitoring demonstration
+- JavaScript bridge testing tools
+
+## Getting Started
+
+### Requirements
+- iOS 16.0+
+- Xcode 15.0+
+- Swift 5.0+
+
+### Opening the Project
+1. Open `Starlink.xcworkspace` in Xcode
+2. The workspace contains both the framework and demo projects
+3. Build the framework first, then the demo app
+
+### Building the Framework
+1. Select the `Starlink` scheme
+2. Choose your target device or simulator
+3. Build the project (⌘+B)
+
+### Running the Demo
+1. Select the `StarlinkDemo` scheme
+2. Choose your target device or simulator
+3. Run the project (⌘+R)
+
+## Framework Usage
+
+### Basic Initialization
 ```swift
 import Starlink
 
-// 基础使用 - 在 AppDelegate 或 SceneDelegate 中设置根视图控制器
+// Initialize the framework
+StarlinkCore.shared.initialize()
+```
+
+### WebView Integration
+```swift
+// Present WebView controller from existing view controller
+StarlinkCore.shared.presentWebViewController(from: self)
+
+// Create root WebView controller for webview-based apps
 let rootViewController = StarlinkCore.shared.createWebViewRootViewController()
 window?.rootViewController = rootViewController
 
-// 使用自定义扩展
+// Create WebView controller with custom extensions
 let extensionProvider = MyExtensionProvider()
 let rootViewController = StarlinkCore.shared.createWebViewRootViewController(
     extensionProvider: extensionProvider
 )
 window?.rootViewController = rootViewController
+
+// Create WebView controller with debug mode enabled (useful when framework is built in Release mode)
+let rootViewController = StarlinkCore.shared.createWebViewRootViewController(
+    extensionProvider: nil,
+    debugMode: true
+)
+window?.rootViewController = rootViewController
+
+// Create standalone WebView controller
+let webViewController = StarlinkCore.shared.createStandaloneWebViewController()
+present(webViewController, animated: true)
+
+// Enable debug mode on existing WebView controller
+if let webVC = rootViewController.viewControllers.first as? StarlinkWebViewController {
+    webVC.isDebugModeEnabled = true
+}
 ```
 
-## ⚙️ 权限配置
+### In-App Purchase Management
+```swift
+// Configure product IDs
+let productIDs = ["com.yourapp.premium", "com.yourapp.subscription"]
+StarlinkIAPManager.shared.configure(productIDs: productIDs)
 
-在项目的 `Info.plist` 中添加以下配置：
+// Load products
+await StarlinkIAPManager.shared.loadProducts()
 
-```xml
-<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsLocalNetworking</key>
-    <true/>
-    <key>NSExceptionDomains</key>
-    <dict>
-        <key>localhost</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-        </dict>
-    </dict>
-</dict>
+// Purchase a product
+let result = await StarlinkIAPManager.shared.purchase(productID: "com.yourapp.premium")
+switch result {
+case .success(let transaction):
+    print("Purchase successful: \(transaction)")
+case .cancelled:
+    print("Purchase cancelled")
+case .failed(let error):
+    print("Purchase failed: \(error)")
+case .pending:
+    print("Purchase pending")
+}
+
+// Restore purchases
+await StarlinkIAPManager.shared.restorePurchases()
+
+// Check if product is purchased
+let isPurchased = StarlinkIAPManager.shared.isPurchased("com.yourapp.premium")
 ```
 
-## 🔧 自定义扩展 (v1.3.0+)
+### Subscription Management
+```swift
+// Update subscription statuses
+await StarlinkSubscriptionManager.shared.updateSubscriptionStatuses()
 
-Starlink 框架支持可扩展的 JavaScript Bridge 系统，允许业务项目添加自定义的 native API。
+// Get active subscriptions
+let activeSubscriptions = StarlinkSubscriptionManager.shared.activeSubscriptions
 
-### 创建自定义扩展
+// Check subscription status
+if let status = StarlinkSubscriptionManager.shared.subscriptionStatuses["com.yourapp.subscription"] {
+    print("Subscription status: \(status)")
+}
+
+// Get subscription info
+if let info = await StarlinkSubscriptionManager.shared.getSubscriptionInfo(for: "com.yourapp.subscription") {
+    print("Subscription expires: \(info.expirationDate)")
+    print("Auto-renew enabled: \(info.willAutoRenew)")
+}
+```
+
+### Network Permission Monitoring
+```swift
+// Network monitoring starts automatically, but you can control it manually
+StarlinkNetworkPermissionMonitor.shared.startMonitoring()
+
+// Check network permission status
+let hasPermission = await StarlinkNetworkPermissionMonitor.shared.checkNetworkPermission()
+
+// Request network permission
+await StarlinkNetworkPermissionMonitor.shared.requestNetworkPermission()
+
+// Wait for network permission with completion handler
+StarlinkNetworkPermissionMonitor.shared.waitForNetworkPermission { granted in
+    if granted {
+        print("Network permission granted")
+    } else {
+        print("Network permission denied")
+    }
+}
+```
+
+### Local HTTP Server
+```swift
+// Start local server for serving web content
+let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+let webRootPath = (documentsPath as NSString).appendingPathComponent("WebRoot")
+
+StarlinkCore.shared.startLocalServer(rootDirectory: webRootPath, port: 18888) { success, error in
+    if success {
+        print("Server started successfully!")
+        if let url = StarlinkCore.shared.localServerURL {
+            print("Server URL: \(url)")
+        }
+    } else {
+        print("Failed to start server: \(error?.localizedDescription ?? "Unknown error")")
+    }
+}
+
+// Stop the server
+StarlinkCore.shared.stopLocalServer()
+
+// Check server status
+let isRunning = StarlinkCore.shared.isLocalServerRunning
+let serverURL = StarlinkCore.shared.localServerURL
+```
+
+### JavaScript Bridge Usage
+The framework provides JavaScript bridges that can be accessed from web content loaded in the WebView:
+
+```javascript
+// In-App Purchase from JavaScript
+window.Starlink.IAP.configureProducts(['com.yourapp.premium', 'com.yourapp.subscription']);
+window.Starlink.IAP.loadProducts();
+window.Starlink.IAP.purchase('com.yourapp.premium');
+window.Starlink.IAP.restorePurchases();
+
+// Device information
+window.Starlink.DeviceInfo.getDeviceInfo();
+window.Starlink.DeviceInfo.getSystemVersion();
+
+// Native alerts
+window.Starlink.Alert.showAlert('Title', 'Message');
+window.Starlink.Alert.showActionSheet('Title', ['Option 1', 'Option 2']);
+
+// Data storage
+window.Starlink.Data.setData('key', 'value');
+window.Starlink.Data.getData('key');
+
+// Network requests
+window.Starlink.Network.request('GET', 'https://api.example.com/data');
+
+// Custom extensions (if registered)
+window.Starlink.MyCustomAPI.myMethod();
+```
+
+## API Reference
+
+### StarlinkCore
+- `shared`: Singleton instance
+- `initialize()`: Initialize framework
+- `presentWebViewController(from:)`: Present WebView controller
+- `createWebViewRootViewController(extensionProvider:debugMode:)`: Create root WebView controller with optional extensions and debug mode
+- `createStandaloneWebViewController()`: Create standalone WebView controller
+- `startLocalServer(rootDirectory:port:completion:)`: Start HTTP server
+- `stopLocalServer()`: Stop HTTP server
+- `isLocalServerRunning`: Check if server is running
+- `localServerURL`: Get server URL
+
+### StarlinkIAPManager
+- `shared`: Singleton instance
+- `configure(productIDs:)`: Configure product IDs for IAP
+- `loadProducts()`: Load products from App Store
+- `purchase(productID:)`: Purchase a product
+- `purchase(product:)`: Purchase a product object
+- `restorePurchases()`: Restore previous purchases
+- `isPurchased(_:)`: Check if product is purchased
+- `products`: Array of available products
+- `purchasedProductIDs`: Set of purchased product IDs
+
+### StarlinkSubscriptionManager
+- `shared`: Singleton instance
+- `updateSubscriptionStatuses(forceRefresh:)`: Update subscription statuses
+- `getSubscriptionInfo(for:)`: Get subscription information
+- `activeSubscriptions`: Array of active subscriptions
+- `subscriptionStatuses`: Dictionary of subscription statuses
+
+### StarlinkNetworkPermissionMonitor
+- `shared`: Singleton instance
+- `startMonitoring()`: Start network monitoring
+- `stopMonitoring()`: Stop network monitoring
+- `checkNetworkPermission()`: Check current network permission
+- `requestNetworkPermission()`: Request network permission
+- `waitForNetworkPermission(completion:)`: Wait for permission with callback
+
+### JavaScript Bridge Modules
+- **StarlinkIAPBridge**: IAP and subscription management from JavaScript
+- **StarlinkAlertBridge**: Native alerts and action sheets
+- **StarlinkDataBridge**: Data storage and retrieval
+- **StarlinkDeviceInfoBridge**: Device information access
+- **StarlinkUmengBridge**: Analytics integration
+- **StarlinkNetworkBridge**: Network request handling
+- **StarlinkBridgeRegistry**: Extensible bridge system for custom APIs
+
+### StarlinkWebViewController
+- Full-featured WebView controller with debug/release modes
+- Runtime debug mode support for framework usage (`isDebugModeEnabled` property)
+- Automatic update checking and local server integration
+- Navigation controls and error handling
+
+## Debug Mode for Framework Usage
+
+When the Starlink framework is built and distributed as a framework (`.xcframework`), the compile-time `#if DEBUG` flag is determined by the framework's build configuration, not the host application's configuration. This means that even if your host app is running in Debug mode, the framework will always use Release mode behavior.
+
+### Problem
+- Framework built in Release mode → `#if DEBUG` is always false
+- Host app cannot access debug URL input dialog
+- Difficult to test with local development servers
+
+### Solution
+The framework now provides runtime debug mode control:
+
+```swift
+// Method 1: Enable debug mode when creating WebView controller
+let rootViewController = StarlinkCore.shared.createWebViewRootViewController(
+    debugMode: true  // This enables debug mode regardless of build configuration
+)
+
+// Method 2: Enable debug mode on existing controller
+if let webVC = navigationController.viewControllers.first as? StarlinkWebViewController {
+    webVC.isDebugModeEnabled = true
+}
+```
+
+### When to Use Debug Mode
+- **Development**: Testing with local development servers (localhost:3000, etc.)
+- **QA Testing**: Manual testing with different server configurations
+- **Framework Integration**: When integrating the framework into other projects during development
+
+### Behavior
+- **Debug Mode Enabled**: Shows URL input dialog for custom server configuration
+- **Debug Mode Disabled**: Uses automatic update check and local server startup (production behavior)
+
+## Custom Bridge Extensions
+
+The framework now supports extensible JavaScript bridge system, allowing business projects to add custom native APIs without modifying the SDK core.
+
+### Creating Custom Bridge Extensions
 
 ```swift
 import Starlink
 
-// 1. 创建自定义 Bridge 模块
-class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
+// 1. Create custom bridge module
+class MyCustomBridge: NSObject, StarlinkJSBridgeModule {
     private weak var bridge: StarlinkJSBridge?
     
     func setBridge(_ bridge: StarlinkJSBridge) {
@@ -76,10 +374,8 @@ class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
     
     func handleCall(method: String, params: [String: Any], callId: String) {
         switch method {
-        case "function1":
-            function1(params: params, callId: callId)
-        case "function2":
-            function2(params: params, callId: callId)
+        case "myMethod":
+            myMethod(params: params, callId: callId)
         default:
             bridge?.sendResult(callId: callId, result: nil, error: "Method not found")
         }
@@ -88,56 +384,45 @@ class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
     func getJavaScriptInterface(moduleName: String) -> String {
         return """
         window.Starlink.\(moduleName) = {
-            function1: function(callback) {
-                return window.StarlinkBridge.call('\(moduleName)', 'function1', {}, callback);
-            },
-            function2: function(callback) {
-                return window.StarlinkBridge.call('\(moduleName)', 'function2', {}, callback);
+            myMethod: function(data, callback) {
+                return window.StarlinkBridge.call('\(moduleName)', 'myMethod', {
+                    data: data
+                }, callback);
             }
         };
-        console.log('Demo API Extension loaded successfully!');
         """
     }
     
-    private func function1(params: [String: Any], callId: String) {
-        let result = ["result": "function1 success", "value": 100]
-        bridge?.sendResult(callId: callId, result: result)
-    }
-    
-    private func function2(params: [String: Any], callId: String) {
-        let result = ["result": "function2 success", "value": 200]
+    private func myMethod(params: [String: Any], callId: String) {
+        let result = ["success": true, "message": "Custom method executed"]
         bridge?.sendResult(callId: callId, result: result)
     }
 }
 
-// 2. 创建扩展提供者
-class DemoExtensionProvider: StarlinkBridgeExtensionProvider {
+// 2. Create extension provider
+class MyExtensionProvider: StarlinkBridgeExtensionProvider {
     func configureBridgeExtensions(registry: StarlinkBridgeRegistry) {
-        let demoAPI = DemoAPIExtension()
-        registry.registerCustomModule(demoAPI, withName: "DemoAPI")
+        let customBridge = MyCustomBridge()
+        registry.registerCustomModule(customBridge, withName: "MyAPI")
     }
 }
 
-// 3. 在 SceneDelegate 中使用
-let extensionProvider = DemoExtensionProvider()
+// 3. Use with WebView controller
+let extensionProvider = MyExtensionProvider()
 let rootViewController = StarlinkCore.shared.createWebViewRootViewController(
     extensionProvider: extensionProvider
 )
-window?.rootViewController = rootViewController
 ```
 
-### JavaScript 中调用自定义 API
+### JavaScript Usage of Custom Extensions
 
 ```javascript
-// Promise 方式
-const result1 = await window.Starlink.DemoAPI.function1();
-console.log(result1); // {result: "function1 success", value: 100}
+// Use custom API from JavaScript
+const result = await window.Starlink.MyAPI.myMethod({key: "value"});
+console.log(result); // {success: true, message: "Custom method executed"}
 
-const result2 = await window.Starlink.DemoAPI.function2();
-console.log(result2); // {result: "function2 success", value: 200}
-
-// 回调方式
-window.Starlink.DemoAPI.function1(function(result, error) {
+// Or with callback
+window.Starlink.MyAPI.myMethod({key: "value"}, function(result, error) {
     if (error) {
         console.error("Error:", error);
     } else {
@@ -146,58 +431,113 @@ window.Starlink.DemoAPI.function1(function(result, error) {
 });
 ```
 
-### 扩展管理
+### Extension Registry Management
 
 ```swift
-// 注册多个模块
+// Register multiple modules
 registry.registerCustomModules([
-    (UserAPI(), "User"),
-    (PaymentAPI(), "Payment"),
-    (AnalyticsAPI(), "Analytics")
+    (UserBridge(), "User"),
+    (PaymentBridge(), "Payment"),
+    (AnalyticsBridge(), "Analytics")
 ])
 
-// 检查模块是否存在
-let hasModule = StarlinkBridgeRegistry.shared.hasModuleWithName("DemoAPI")
+// Check if module exists
+let hasModule = StarlinkBridgeRegistry.shared.hasModuleWithName("MyAPI")
 
-// 获取所有模块名称
+// Get all registered module names
 let moduleNames = StarlinkBridgeRegistry.shared.getRegisteredModuleNames()
 
-// 移除自定义模块
-StarlinkBridgeRegistry.shared.removeCustomModule(withName: "DemoAPI")
+// Remove custom module
+StarlinkBridgeRegistry.shared.removeCustomModule(withName: "MyAPI")
+
+// Clear all custom modules
+StarlinkBridgeRegistry.shared.clearCustomModules()
 ```
 
-## 📋 系统要求
+## Integration into Other Projects
 
-- **iOS**: 16.0+
-- **Xcode**: 14.0+
-- **Swift**: 5.7+
+### Using the Framework
+1. Build the Starlink framework
+2. Add `Starlink.framework` to your target project
+3. Import the framework: `import Starlink`
+4. Initialize and use as shown in the usage examples
 
-## 🔒 许可证
+### Serving Vue.js Projects
+1. Build your Vue.js project (`npm run build`)
+2. Copy the `dist` folder contents to your iOS app's Documents/WebRoot directory
+3. Start the local server pointing to the WebRoot directory
+4. Access your Vue app at `http://localhost:18888`
+5. Use JavaScript bridges to access native iOS functionality
 
-私有框架，仅供授权团队使用。
+### Hybrid App Development
+The framework is perfect for creating hybrid iOS apps where:
+- The entire UI is built with web technologies (Vue.js, React, etc.)
+- Native iOS APIs are accessed through JavaScript bridges
+- Local HTTP server serves the web content
+- WebView controller handles the app lifecycle
 
----
+## Dependencies
 
-## 🌟 核心功能
+The framework includes the following dependencies:
+- **ZipArchive**: For handling ZIP file operations
+- **Umeng SDK**: For analytics and statistics (included frameworks)
+  - UMCommon.xcframework: Core Umeng functionality
+  - UMDevice.xcframework: Device information collection
+  - UYuMao.xcframework: Advanced analytics features
+  - UMCommonLog.framework: Logging functionality
+  - UMRemoteConfig.framework: Remote configuration
+  - UTDID.framework: Device identification
 
-- **WebView 集成**: 完整的 WebView 控制器，支持调试和发布模式
-- **JavaScript Bridge**: 原生 iOS API 的 JavaScript 桥接
-- **本地服务器**: 内置 HTTP 服务器，支持 Vue.js 等前端项目
-- **网络管理**: 自动网络权限监控和请求处理
-- **IAP 支持**: 完整的应用内购买和订阅管理
-- **可扩展架构**: 支持自定义 native API 扩展
+**Note**: Starting from version 1.6.0, all Umeng SDK dependencies are automatically included in the Starlink.xcframework distribution, eliminating the need for separate integration.
 
-## 📚 更多资源
+## Project Configuration
 
-- 📱 **示例项目**: 请访问源码仓库获取完整的 StarlinkDemo 示例项目
-- 🌐 **JavaScript SDK 测试**: 请访问源码仓库获取 starlink-test-app 测试应用
-- 📖 **API 文档**: 完整的桥接 API 文档包含在源码仓库中
+### Swift Package Dependencies
+- ZipArchive: Used for archive operations
 
-### 版本更新
-框架会定期发布新版本，请关注 [Releases](https://github.com/srulos-bgz/starlink-releases/releases) 页面获取最新版本。
+### Linker Flags
+The project includes linker flags to suppress warnings from third-party frameworks:
+```
+OTHER_LDFLAGS = "-Wl,-no_warn_duplicate_libraries -Wl,-w"
+```
 
-#### v1.3.0 新特性
-- ✨ **可扩展 JavaScript Bridge 系统**
-- 🔧 **自定义 native API 支持**
-- 📦 **模块化架构设计**
-- 🔄 **向后兼容保证**
+## Architecture
+
+The framework follows these design principles:
+- **Modular Design**: Separate modules for different functionality (IAP, Network, WebView, etc.)
+- **Singleton Pattern**: Shared instances for managers and core components
+- **JavaScript Bridge System**: Seamless communication between web and native code
+- **Async/Await**: Modern Swift concurrency for IAP and network operations
+- **StoreKit 2**: Latest Apple APIs for In-App Purchases
+- **iOS Best Practices**: Follows Apple's recommended patterns and guidelines
+
+## Development Notes
+
+### Network Permission Handling
+- Network monitoring starts automatically on framework initialization
+- Network permission requests are triggered proactively (0.1s delay)
+- Automatic lightweight network requests to prompt system permission dialogs
+
+### IAP and Subscription Management
+- Full StoreKit 2 integration with comprehensive product data
+- Automatic transaction listening and processing
+- Subscription status caching and real-time updates
+- JavaScript bridge exposes complete IAP functionality to web content
+
+### WebView Integration
+- Debug mode: URL input for development testing
+- Release mode: Automatic update check → local server → web content loading
+- Full-screen and embedded WebView controller options
+- Automatic server lifecycle management
+
+## License
+
+Copyright © 2025 Starlink. All rights reserved.
+
+## Repository
+
+GitHub: https://github.com/srulos-bgz/Starlink.git
+
+## Support
+
+For questions or issues, please refer to the demo application for usage examples or contact the development team.
