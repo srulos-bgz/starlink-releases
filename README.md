@@ -1,6 +1,197 @@
-# Starlink iOS Framework v1.7.0
+# Starlink iOS Framework
 
-## 🚀 新特性
+一个功能强大的 iOS WebView 框架，支持可扩展的 JavaScript Bridge 系统和原生 API 集成。
+
+## 📦 安装方式
+
+### Swift Package Manager
+
+在你的 `Package.swift` 中添加：
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.3")
+]
+```
+
+或在 Xcode 中：
+1. File → Add Package Dependencies
+2. 输入仓库 URL: `https://github.com/srulos-bgz/starlink-releases`
+3. 选择版本 `1.7.3` 或更高版本
+
+## 📋 使用示例
+
+### 基础使用
+
+```swift
+import Starlink
+
+// 在 SceneDelegate.swift 中
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        window = UIWindow(windowScene: windowScene)
+        
+        // 基础使用 - 不带扩展
+        let rootViewController = StarlinkCore.shared.createWebViewRootViewController()
+        
+        window?.rootViewController = rootViewController
+        window?.makeKeyAndVisible()
+    }
+}
+```
+
+### 调试模式
+
+框架支持调试模式，方便开发时连接到本地开发服务器。推荐使用条件编译来自动切换：
+
+```swift
+#if DEBUG
+let rootViewController = StarlinkCore.shared.createWebViewRootViewController(debugMode: true)
+#else
+let rootViewController = StarlinkCore.shared.createWebViewRootViewController(debugMode: false)
+#endif
+window?.rootViewController = rootViewController
+```
+
+**调试模式功能：**
+- **debugMode: true** - 启动时显示 Action Sheet，提供两种输入方式：
+  - 输入完整 HTTP 链接（如：http://192.168.1.100:3000）
+  - 分别输入本地 IP 地址和端口号
+- **debugMode: false** - 正常启动，加载内置的 Web 项目
+
+**使用场景：**
+- Debug 构建：自动启用调试模式，连接本地开发服务器
+- Release 构建：自动使用内置 Web 资源
+
+### 扩展使用和示例
+
+#### 1. 扩展使用
+
+```swift
+import Starlink
+
+// 在 SceneDelegate.swift 中
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        window = UIWindow(windowScene: windowScene)
+        
+        // 带扩展使用
+        let extensionProvider = DemoExtensionProvider()
+        let rootViewController = StarlinkCore.shared.createWebViewRootViewController(
+            extensionProvider: extensionProvider,
+            debugMode: false
+        )
+        
+        window?.rootViewController = rootViewController
+        window?.makeKeyAndVisible()
+    }
+}
+```
+
+#### 2. 创建自定义 API 模块
+
+```swift
+import Starlink
+
+class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
+    
+    private weak var bridge: StarlinkJSBridge?
+    
+    func setBridge(_ bridge: StarlinkJSBridge) {
+        self.bridge = bridge
+    }
+    
+    func handleCall(method: String, params: [String: Any], callId: String) {
+        switch method {
+        case "function1":
+            function1(params: params, callId: callId)
+        case "function2":
+            function2(params: params, callId: callId)
+        default:
+            bridge?.sendResult(callId: callId, result: nil, error: "Method '\(method)' not found in DemoAPI")
+        }
+    }
+    
+    func getJavaScriptInterface(moduleName: String) -> String {
+        return \"\"\"
+        window.Starlink.\(moduleName) = {
+            function1: function(callback) {
+                return window.StarlinkBridge.call('\(moduleName)', 'function1', {}, callback);
+            },
+            function2: function(callback) {
+                return window.StarlinkBridge.call('\(moduleName)', 'function2', {}, callback);
+            }
+        };
+        \"\"\"
+    }
+    
+    private func function1(params: [String: Any], callId: String) {
+        let result = ["result": "function1 success", "value": 100]
+        bridge?.sendResult(callId: callId, result: result)
+    }
+    
+    private func function2(params: [String: Any], callId: String) {
+        let result = ["result": "function2 success", "value": 200]
+        bridge?.sendResult(callId: callId, result: result)
+    }
+}
+```
+
+#### 3. 创建扩展提供者
+
+```swift
+class DemoExtensionProvider: StarlinkBridgeExtensionProvider {
+    func configureBridgeExtensions(registry: StarlinkBridgeRegistry) {
+        let demoAPI = DemoAPIExtension()
+        registry.registerCustomModule(demoAPI, withName: "DemoAPI")
+    }
+}
+```
+
+#### 4. JavaScript 调用
+
+```javascript
+// 调用自定义 API
+window.Starlink.DemoAPI.function1((result) => {
+    console.log('Function1 结果:', result);
+});
+
+window.Starlink.DemoAPI.function2((result) => {
+    console.log('Function2 结果:', result);
+});
+```
+
+### 内置 API 模块
+
+框架提供以下内置模块：
+
+- **StarlinkAlert**: 原生弹窗和提示
+- **StarlinkData**: 数据存储和管理  
+- **StarlinkDeviceInfo**: 设备信息获取
+- **StarlinkLocation**: 位置服务
+- **StarlinkNetwork**: 网络状态监控
+- **StarlinkIAP**: 内购功能支持
+
+## 🔄 兼容性
+
+- **iOS**: 13.0+
+- **Xcode**: 14.0+
+- **Swift**: 5.7+
+
+## 📚 更多资源
+
+- [完整示例项目](https://github.com/srulos-bgz/starlink-test-app) - Native API 在 Web 项目中的完整使用示例
+- [更新日志](https://github.com/srulos-bgz/starlink-releases/releases)
+
+## 🆕 最新更新 (v1.7.3)
 
 ### 🔧 运行时调试模式支持 (v1.7.0)
 - **重要更新**: 解决了 framework 打包后无法进入调试模式的问题
@@ -8,112 +199,13 @@
 - 更新 `createWebViewRootViewController` 方法，添加 `debugMode` 参数
 - 即使 framework 以 Release 模式构建，宿主应用仍可启用调试模式
 - 完善的文档说明和使用示例
-
 ### 📦 完整的友盟SDK集成 (v1.6.0)
 - **重要更新**: 修复了 "No such module 'UMCommon'" 错误
 - 所有友盟SDK依赖现已自动包含在framework中：
-  - UMCommon.xcframework: 核心友盟功能
-  - UMDevice.xcframework: 设备信息收集
-  - UYuMao.xcframework: 高级分析功能
-  - UMCommonLog.framework: 日志功能
-  - UMRemoteConfig.framework: 远程配置
-  - UTDID.framework: 设备标识
-- 更新了打包脚本，确保所有依赖都包含在分发包中
-- 无需额外集成友盟SDK，开箱即用
 
-### 🧹 代码清理和优化 (v1.5.0)
-- 移除多余的UmengSDK文档文件
-- 清理项目结构，减少不必要的资源文件
-- 优化构建流程和包大小
-
-### 🔧 Release Notes 自动化 (v1.4.0)
-- 新增独立的 release-notes.md 模板系统
-- 自动替换 checksum 和版本信息
-- 改进发布流程的文档生成
-
-### ✨ 可扩展 JavaScript Bridge 系统 (v1.3.0+)
-- 引入全新的扩展架构，支持业务项目注入自定义 native API
-- 新增 `StarlinkBridgeRegistry` 统一管理所有桥接模块
-- 提供 `StarlinkBridgeExtensionProvider` 协议，简化扩展开发
-
-### 🔧 自定义 API 支持 (v1.3.0+)
-- 支持 Promise 和回调两种 JavaScript 调用方式
-- 动态模块注册和移除
-- 模块冲突检测和管理
-- 完整的错误处理机制
-
-### 📦 模块化架构 (v1.3.0+)
-- 保持向后兼容，现有代码无需修改
-- 清晰的扩展接口设计
-- 统一的模块生命周期管理
-
-## 📋 使用示例
-
-### 创建自定义扩展
-
-```swift
-import Starlink
-
-class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
-    static let moduleName = "DemoAPI"
-    
-    func function1(params: [String: Any], callback: @escaping StarlinkJSCallback) {
-        let result = ["message": "Hello from native!", "timestamp": Date().timeIntervalSince1970]
-        callback(.success(result))
-    }
-}
-
-class DemoExtensionProvider: StarlinkBridgeExtensionProvider {
-    func getCustomBridgeModules() -> [StarlinkJSBridgeModule] {
-        return [DemoAPIExtension()]
-    }
-}
-```
-
-### 集成到项目
-
-```swift
-let extensionProvider = DemoExtensionProvider()
-let webViewController = StarlinkCore.createWebViewController(
-    extensionProvider: extensionProvider
-)
-```
-
-### JavaScript 调用
-
-```javascript
-// Promise 方式
-const result = await window.StarlinkBridge.DemoAPI.function1({});
-
-// 回调方式
-window.StarlinkBridge.DemoAPI.function1({}, (result) => {
-    console.log('Native API result:', result);
-});
-```
-
-## 🔄 兼容性
-
-- **iOS**: 16.0+
-- **Xcode**: 14.0+
-- **Swift**: 5.7+
-- 完全向后兼容，现有项目无需修改
-
-## 📦 安装方式
-
-在你的 `Package.swift` 中添加：
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.0")
-]
-```
-
-## 📚 文档
-
-完整的扩展开发指南和 API 文档请访问：
-- [GitHub Repository](https://github.com/srulos-bgz/starlink-releases)
-- StarlinkDemo 示例项目
+查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.3)
 
 ---
 
-**Checksum**: `c2b6c5282d3635cc1e5cb0cce6f775f8bffdd83edf769ddaaec728fde2c9f340`
+**当前版本**: 1.7.3  
+**Checksum**: a2d72e140d7feba9f2ef1ba47a7c62d61fa3ac39e57c8ab8b31f3d66bd89fa8e
