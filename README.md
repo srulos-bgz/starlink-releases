@@ -10,18 +10,19 @@
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.4")
+    .package(url: "https://github.com/srulos-bgz/starlink-releases", from: "1.7.5")
 ]
 ```
 
 或在 Xcode 中：
 1. File → Add Package Dependencies
 2. 输入仓库 URL: `https://github.com/srulos-bgz/starlink-releases`
-3. 选择版本 `1.7.4` 或更高版本
+3. 选择版本 `1.7.5` 或更高版本
 
 ## 📋 使用示例
 
 ### 基础使用
+
 ```swift
 import Starlink
 
@@ -44,6 +45,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 ```
 
 ### 调试模式
+
 框架支持调试模式，方便开发时连接到本地开发服务器。推荐使用条件编译来自动切换：
 
 ```swift
@@ -66,6 +68,7 @@ window?.rootViewController = rootViewController
 - Release 构建：自动使用内置 Web 资源
 
 ### 扩展使用和示例
+
 #### 1. 扩展使用
 
 ```swift
@@ -118,7 +121,7 @@ class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
     }
     
     func getJavaScriptInterface(moduleName: String) -> String {
-        return """
+        return \"\"\"
         window.Starlink.\(moduleName) = {
             function1: function(callback) {
                 return window.StarlinkBridge.call('\(moduleName)', 'function1', {}, callback);
@@ -127,7 +130,7 @@ class DemoAPIExtension: NSObject, StarlinkJSBridgeModule {
                 return window.StarlinkBridge.call('\(moduleName)', 'function2', {}, callback);
             }
         };
-        """
+        \"\"\"
     }
     
     private func function1(params: [String: Any], callId: String) {
@@ -178,16 +181,17 @@ window.Starlink.DemoAPI.function2((result) => {
 - **StarlinkIAP**: 内购功能支持
 
 ## 🔄 兼容性
+
 - **iOS**: 13.0+
 - **Xcode**: 14.0+
 - **Swift**: 5.7+
 
 ## 📚 更多资源
+
 - [完整示例项目](https://github.com/srulos-bgz/starlink-test-app) - Native API 在 Web 项目中的完整使用示例
-- [Demo 下载](https://gamepet.oss-cn-shenzhen.aliyuncs.com/Demo.zip) - 可直接运行的演示项目
 - [更新日志](https://github.com/srulos-bgz/starlink-releases/releases)
 
-## 🆕 最新更新 (v1.7.4)
+## 🆕 最新更新 (v1.7.5)
 
 ### 🔧 运行时调试模式支持 (v1.7.0)
 - **重要更新**: 解决了 framework 打包后无法进入调试模式的问题
@@ -195,10 +199,13 @@ window.Starlink.DemoAPI.function2((result) => {
 - 更新 `createWebViewRootViewController` 方法，添加 `debugMode` 参数
 - 即使 framework 以 Release 模式构建，宿主应用仍可启用调试模式
 - 完善的文档说明和使用示例
+### 📦 完整的友盟SDK集成 (v1.6.0)
+- **重要更新**: 修复了 "No such module 'UMCommon'" 错误
+- 所有友盟SDK依赖现已自动包含在framework中：
 
-查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.4)
+查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.5)
 
 ---
 
-**当前版本**: 1.7.4  
-**Checksum**: b005e116826271280351519c0ef397324145c0ec2044d04424e042a8fa8c5f38
+**当前版本**: 1.7.5  
+**Checksum**: 333aab76fd075110c296490839af06d6e70dd568685c54a6d10a5a68f7b22bca
