@@ -196,10 +196,6 @@ window.Starlink.DemoAPI.function2((result) => {
 - 即使 framework 以 Release 模式构建，宿主应用仍可启用调试模式
 - 完善的文档说明和使用示例
 
-### 📦 完整的友盟SDK集成 (v1.6.0)
-- **重要更新**: 修复了 "No such module 'UMCommon'" 错误
-- 所有友盟SDK依赖现已自动包含在framework中：
-
 查看完整更新日志: [Releases](https://github.com/srulos-bgz/starlink-releases/releases/tag/1.7.4)
 
 ---
