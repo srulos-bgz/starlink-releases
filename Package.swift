@@ -17,8 +17,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Starlink",
-            url: "https://github.com/srulos-bgz/starlink-releases/releases/download/1.7.7/Starlink.xcframework.zip",
-            checksum: "a4015607bac007f3ae1c478f41a0e1794384d340b1434f402054b63c625496a4"
+            url: "https://github.com/srulos-bgz/starlink-releases/releases/download/1.7.8/Starlink.xcframework.zip",
+            checksum: "87428741f6644a5c0ff629a3e0f8ec96c777c974bb925cc7c211ba6630be6e62"
         )
     ]
 )
